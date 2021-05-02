@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using PN.WeatherForecast.API.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,6 +29,10 @@ namespace PN.WeatherForecast.API
         {
 
             services.AddControllers();
+            services.AddHttpClient<IWeatherForecastService, WeatherForecastService>(c =>
+            {
+                c.BaseAddress = new Uri(Configuration["OpenWeatherBaseURI"]);
+            });
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "PN.WeatherForecast.API", Version = "v1" });

@@ -1,39 +1,32 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace PN.WeatherForecast.API.Controllers
+﻿namespace PN.WeatherForecast.API.Controllers
 {
+    using Microsoft.AspNetCore.Mvc;
+    using PN.WeatherForecast.API.Criteria;
+    using PN.WeatherForecast.API.Services;
+    using System.Threading.Tasks;
+
+    [Route("[controller]/[action]")]
     [ApiController]
-    [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
+        private readonly IWeatherForecastService _weatherService;
 
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(IWeatherForecastService weatherService)
         {
-            _logger = logger;
+            _weatherService = weatherService;
         }
 
         [HttpGet]
-        public IEnumerable<WeatherForecast> Get()
+        public async Task<IActionResult> GetWeatherData([FromQuery] GeoCoordinateCriteria criteria)
         {
-            var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            if (!ModelState.IsValid)
             {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
-            })
-            .ToArray();
+                return BadRequest();
+            }
+
+            var data = await _weatherService.GetWeatherForecastData(criteria);
+
+            return Ok(data);
         }
     }
 }
